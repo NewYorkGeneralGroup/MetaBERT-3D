@@ -1,0 +1,58 @@
+import yaml
+from dataclasses import dataclass
+from typing import Optional, Dict, Any
+
+@dataclass
+class ModelConfig:
+    vocab_size: int
+    point_dim: int
+    hidden_size: int
+    num_layers: int
+    num_heads: int
+    dropout: float
+
+@dataclass
+class TrainingConfig:
+    batch_size: int
+    num_epochs: int
+    learning_rate: float
+    weight_decay: float
+    warmup_steps: int
+    max_grad_norm: float
+    num_workers: int
+
+@dataclass
+class DataConfig:
+    num_points: int
+    max_text_length: int
+    train_point_cloud_path: str
+    train_annotations_path: str
+    val_point_cloud_path: str
+    val_annotations_path: str
+
+@dataclass
+class Config:
+    model: ModelConfig
+    training: TrainingConfig
+    data: DataConfig
+    logging: Dict[str, Any]
+    optimization: Dict[str, Any]
+    augmentation: Dict[str, Any]
+    
+    @classmethod
+    def from_yaml(cls, path: str):
+        with open(path, 'r') as f:
+            config_dict = yaml.safe_load(f)
+            
+        model_config = ModelConfig(**config_dict['model'])
+        training_config = TrainingConfig(**config_dict['training'])
+        data_config = DataConfig(**config_dict['data'])
+        
+        return cls(
+            model=model_config,
+            training=training_config,
+            data=data_config,
+            logging=config_dict['logging'],
+            optimization=config_dict['optimization'],
+            augmentation=config_dict['augmentation']
+        )
